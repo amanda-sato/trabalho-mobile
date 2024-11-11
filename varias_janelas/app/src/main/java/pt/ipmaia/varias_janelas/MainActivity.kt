@@ -57,19 +57,38 @@ fun ProgramaPrincipal() {
     val valor1 = rememberSaveable { mutableStateOf("") }
     val valor2 = rememberSaveable { mutableStateOf("") }
 
+    // Usa uma lista mutável para ingredientes
+    val ingredientesList = rememberSaveable { mutableStateOf(mutableListOf<String>()) }
+
+    // Define o callback onIngredientsSelected para adicionar ingredientes e atualizar a lista
+    val onIngredientsSelected: (List<String>, String) -> Unit = { ingredients, category ->
+        ingredientesList.value = ingredientesList.value.toMutableList().apply {
+            addAll(ingredients) // Adiciona todos os novos ingredientes
+        }
+        println("Ingredientes selecionados: ${ingredientesList.value}")
+        println("Categoria selecionada: $category")
+    }
+
     Scaffold(
         bottomBar = { BottomNavigationBar(navController = navController, appItems = Destino.toList) },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                AppNavigation(navController = navController, tipoPessoa, nome, telefone, valor1, valor2)
+                AppNavigation(navController = navController, tipoPessoa, nome, telefone, valor1, valor2, onIngredientsSelected)
             }
         }
     )
 }
 
-
 @Composable
-fun AppNavigation(navController: NavHostController, tipoPessoa: MutableState<String>, nome: MutableState<String>, telefone: MutableState<String>, valor1: MutableState<String>, valor2: MutableState<String>) {
+fun AppNavigation(
+    navController: NavHostController,
+    tipoPessoa: MutableState<String>,
+    nome: MutableState<String>,
+    telefone: MutableState<String>,
+    valor1: MutableState<String>,
+    valor2: MutableState<String>,
+    onIngredientsSelected: (List<String>, String) -> Unit
+) {
     NavHost(navController, startDestination = Destino.Ecra03.route) {
         composable(Destino.Ecra01.route) {
             Ecra01(tipoPessoa, nome, telefone, valor1, valor2, navController)
@@ -78,10 +97,11 @@ fun AppNavigation(navController: NavHostController, tipoPessoa: MutableState<Str
             Ecra02(navController)
         }
         composable(Destino.Ecra03.route) {
-            Ecra03(valor1, valor2, navController)
+            Ecra03(navController, onIngredientsSelected)
         }
     }
 }
+
 
 
 @Composable

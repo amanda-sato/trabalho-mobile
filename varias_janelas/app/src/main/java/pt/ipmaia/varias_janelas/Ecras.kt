@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -112,9 +113,8 @@ fun Ecra01(
 
 @Composable
 fun Ecra02(
-
     navController: NavHostController
-) {
+    ) {
     val categories = listOf("Café da Manhã", "Almoço", "Jantar")
     val recipesByCategory = mapOf(
         "Café da Manhã" to listOf("Panquecas" to "Panquecas fofinhas", "Omelete" to "Omelete saudável"),
@@ -217,68 +217,115 @@ fun Ecra02(
 
 
 
+@Composable
+fun Ecra03(
+    navController: NavHostController,
+    onIngredientsSelected: (List<String>, String) -> Unit
+) {
+    val categories = listOf("Café da Manhã", "Almoço", "Jantar")
+    val popularIngredients = listOf("Ovos", "Leite", "Farinha", "Frango", "Arroz", "Tomate", "Queijo")
 
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var ingredientText by remember { mutableStateOf(TextFieldValue("")) }
+    val selectedIngredients = remember { mutableStateListOf<String>() } // Lista mutável para acompanhar os ingredientes em tempo real
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("Inserir Ingredientes", fontWeight = FontWeight.Bold)
 
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de texto para adicionar ingredientes
+        OutlinedTextField(
+            value = ingredientText,
+            onValueChange = { ingredientText = it },
+            label = { Text("Digite um ingrediente") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
 
-    @Composable
-    fun Ecra03(valor1: MutableState<String>, valor2: MutableState<String>, navController: NavHostController) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Botão para adicionar o ingrediente à lista
+        Button(onClick = {
+            if (ingredientText.text.isNotBlank()) {
+                selectedIngredients.add(ingredientText.text) // Adiciona o ingrediente diretamente à lista
+                ingredientText = TextFieldValue("") // Limpa o campo após adicionar
+            }
+        }) {
+            Text("Adicionar Ingrediente")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Lista de Ingredientes Populares
+        Text("Ingredientes Populares", fontWeight = FontWeight.Bold)
+        LazyRow {
+            items(popularIngredients) { ingredient ->
+                Button(
+                    onClick = {
+                        if (ingredient !in selectedIngredients) {
+                            selectedIngredients.add(ingredient) // Adiciona ingredientes populares à lista
+                        }
+                    },
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Text(ingredient)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Exibe ingredientes selecionados em tempo real
+        Text("Ingredientes Selecionados", fontWeight = FontWeight.Bold)
+        LazyColumn {
+            items(selectedIngredients) { ingredient ->
+                Text("- $ingredient")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Seletor de categoria de refeição
+        Text("Escolha a Categoria da Refeição", fontWeight = FontWeight.Bold)
+        LazyRow {
+            items(categories) { category ->
+                Button(
+                    onClick = { selectedCategory = category },
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Text(
+                        text = category,
+                        fontWeight = if (category == selectedCategory) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botão para confirmar e enviar os dados
+        Button(
+            onClick = {
+                selectedCategory?.let {
+                    onIngredientsSelected(selectedIngredients, it) // Envia a lista de ingredientes e a categoria selecionada
+                    navController.popBackStack() // Volta à tela anterior após confirmar
+                }
+            },
+            enabled = selectedCategory != null && selectedIngredients.isNotEmpty()
         ) {
-            Text("Escolha quais os tipos de pessoas:")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            BasicTextField(
-                value = valor1.value,
-                onValueChange = { valor1.value = it },
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            ) { innerTextField ->
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    if (valor1.value.isEmpty()) {
-                        Text("Tipo 1: ")
-                    }
-                    innerTextField()
-                }
-            }
-
-            BasicTextField(
-                value = valor2.value,
-                onValueChange = { valor2.value = it },
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            ) { innerTextField ->
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    if (valor2.value.isEmpty()) {
-                        Text("Tipo 2: ")
-                    }
-                    innerTextField()
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = {
-                navController.navigate(Destino.Ecra01.route)
-            }) {
-                Text("Adicionar")
-            }
-
+            Text("Confirmar e Buscar Receitas")
         }
     }
+}
+
+
+
+
 
 
 @Composable
