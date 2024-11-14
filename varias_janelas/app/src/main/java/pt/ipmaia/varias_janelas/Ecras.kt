@@ -385,6 +385,10 @@ fun Ecra04(
                         modifier = Modifier
                             .padding(8.dp)
                             .fillMaxWidth()
+                            .clickable {
+                                // Navegar para a tela de detalhes da receita (Ecra05)
+                                navController.navigate(Destino.Ecra05.createRoute(recipeName, ingredients.joinToString(", ")))
+                            }
                     ) {
                         Text(recipeName, fontWeight = FontWeight.Bold)
                         Text("Ingredientes: ${ingredients.joinToString(", ")}")
@@ -408,41 +412,46 @@ fun Ecra04(
 
 
 
+
 @Composable
 fun Ecra05(
-    tipoPessoa: MutableState<String>,
-    nome: MutableState<String>,
-    telefone: MutableState<String>,
-    navController: NavHostController // Adicionado navController aqui
+    recipeName: String,
+    ingredients: String,
+    navController: NavHostController
 ) {
-    // Usando LazyColumn para permitir o scroll
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        item {
-            Text("Dados recebidos:", fontWeight = FontWeight.Bold)
+        Text(
+            text = "Detalhes da Receita: $recipeName",
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        // Ingredientes da receita
+        Text("Ingredientes:", fontWeight = FontWeight.Bold)
+        ingredients.split(", ").forEach { ingredient ->
+            Text("- $ingredient")
+        }
 
-            Text("Tipo de pessoa: ${tipoPessoa.value}")
-            Text("Nome: ${nome.value}")
-            Text("Telefone: ${telefone.value}")
+        Spacer(modifier = Modifier.height(16.dp))
 
-            // Se precisar adicionar mais informações, faça isso aqui.
+        // Aqui você pode adicionar mais detalhes da receita, como modo de preparo.
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-            // Botão para voltar
-            Button(onClick = {
-                navController.popBackStack() // Retorna à tela anterior
-            }) {
-                Text("Voltar")
-            }
+        // Botão para voltar
+        Button(onClick = {
+            navController.popBackStack() // Retorna à tela anterior
+        }) {
+            Text("Voltar")
         }
     }
 }
+
+
 
 
 @Composable

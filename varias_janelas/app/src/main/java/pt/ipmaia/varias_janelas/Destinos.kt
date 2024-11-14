@@ -17,7 +17,16 @@ sealed class Destino(val route: String, val icon: Int, val title: String) {
         }
     }
 
-    object Ecra05 : Destino(route = "ecra05", icon = R.drawable.baseline_archive_24, title = "Ecra05")
+    object Ecra05 : Destino(
+        route = "ecra05/{recipeName}/{recipeDescription}",
+        icon = R.drawable.baseline_archive_24,
+        title = "Ecra05"
+    ) {
+        fun createRoute(recipeName: String, recipeDescription: String): String {
+            return "ecra05/$recipeName/$recipeDescription"
+        }
+    }
+
     object Ecra06 : Destino(route = "ecra06", icon = R.drawable.baseline_archive_24, title = "Ecra06")
 
     companion object {

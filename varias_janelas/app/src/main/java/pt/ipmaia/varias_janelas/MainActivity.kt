@@ -118,6 +118,15 @@ fun AppNavigation(
             )
         }
 
+        composable(
+            route = Destino.Ecra05.route,
+            arguments = listOf(navArgument("recipeName") { type = NavType.StringType }, navArgument("recipeDescription") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val recipeName = backStackEntry.arguments?.getString("recipeName") ?: ""
+            val recipeDescription = backStackEntry.arguments?.getString("recipeDescription") ?: ""
+            Ecra05(recipeName, recipeDescription, navController)
+        }
+
     }
 }
 
