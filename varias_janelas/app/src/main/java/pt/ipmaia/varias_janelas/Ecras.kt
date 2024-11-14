@@ -1,6 +1,7 @@
 package pt.ipmaia.varias_janelas
 
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -311,18 +312,22 @@ fun Ecra03(
         // Botão para confirmar e enviar os dados
         Button(
             onClick = {
-                selectedCategory?.let {
-                    onIngredientsSelected(selectedIngredients, it) // Envia a lista de ingredientes e a categoria selecionada
-                    navController.popBackStack() // Volta à tela anterior após confirmar
+                selectedCategory?.let { category ->
+                    val ingredientsArg = selectedIngredients.joinToString(",") // Serializa os ingredientes
+                    // Passando os parâmetros na navegação
+                    navController.navigate(Destino.Ecra04.createRoute(ingredientsArg, category))
                 }
             },
             enabled = selectedCategory != null && selectedIngredients.isNotEmpty()
         ) {
             Text("Confirmar e Buscar Receitas")
         }
+
+
+
+
     }
 }
-
 
 
 
@@ -330,39 +335,77 @@ fun Ecra03(
 
 @Composable
 fun Ecra04(
-    tipoPessoa: MutableState<String>,
-    nome: MutableState<String>,
-    telefone: MutableState<String>,
-    navController: NavHostController // Adicionado navController aqui
+    selectedIngredients: List<String>, // Ingredientes selecionados
+    selectedCategory: String, // Categoria selecionada
+    navController: NavHostController
 ) {
-    // Usando LazyColumn para permitir o scroll
-    LazyColumn(
+    // Verifique se os dados estão sendo recebidos corretamente
+    Log.d("Ecra04", "Ingredientes: $selectedIngredients, Categoria: $selectedCategory")
+
+    // Simulando uma base de dados de receitas
+    val recipes = listOf(
+        "Panquecas" to listOf("Ovos", "Leite", "Farinha"),
+        "Omelete" to listOf("Ovos", "Queijo"),
+        "Frango com Arroz" to listOf("Frango", "Arroz"),
+        "Pizza Margherita" to listOf("Tomate", "Queijo"),
+        "Salada César" to listOf("Alface", "Frango", "Queijo")
+    )
+
+    // Filtrar receitas que podem ser feitas com os ingredientes selecionados
+    val filteredRecipes = recipes.filter { (_, ingredients) ->
+        ingredients.all { it in selectedIngredients }
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        item {
-            Text("Dados recebidos:", fontWeight = FontWeight.Bold)
+        Text(
+            text = "Receitas para ${selectedCategory.lowercase()}",
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        // Ingredientes selecionados
+        Text("Ingredientes Disponíveis:")
+        selectedIngredients.forEach { ingredient ->
+            Text("- $ingredient")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Tipo de pessoa: ${tipoPessoa.value}")
-            Text("Nome: ${nome.value}")
-            Text("Telefone: ${telefone.value}")
-
-            // Se precisar adicionar mais informações, faça isso aqui.
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botão para voltar
-            Button(onClick = {
-                navController.popBackStack() // Retorna à tela anterior
-            }) {
-                Text("Voltar")
+        // Exibição das receitas filtradas
+        Text("Receitas Sugeridas:", fontWeight = FontWeight.Bold)
+        if (filteredRecipes.isEmpty()) {
+            Text("Nenhuma receita encontrada com os ingredientes fornecidos.")
+        } else {
+            LazyColumn {
+                items(filteredRecipes) { (recipeName, ingredients) ->
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(recipeName, fontWeight = FontWeight.Bold)
+                        Text("Ingredientes: ${ingredients.joinToString(", ")}")
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
             }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botão para voltar ou ajustar
+        Button(onClick = {
+            navController.popBackStack() // Retorna ao Ecrã03
+        }) {
+            Text("Voltar")
         }
     }
 }
+
+
 
 
 @Composable

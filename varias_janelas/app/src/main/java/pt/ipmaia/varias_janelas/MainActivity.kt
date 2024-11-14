@@ -26,10 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import pt.ipmaia.varias_janelas.ui.theme.Varias_janelasTheme
 
 class MainActivity : ComponentActivity() {
@@ -99,8 +101,26 @@ fun AppNavigation(
         composable(Destino.Ecra03.route) {
             Ecra03(navController, onIngredientsSelected)
         }
+        composable(
+            route = Destino.Ecra04.route,
+            arguments = listOf(
+                navArgument("ingredients") { type = NavType.StringType },
+                navArgument("category") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val ingredients = backStackEntry.arguments?.getString("ingredients")?.split(",") ?: emptyList()
+            val category = backStackEntry.arguments?.getString("category") ?: ""
+
+            Ecra04(
+                selectedIngredients = ingredients,
+                selectedCategory = category,
+                navController = navController
+            )
+        }
+
     }
 }
+
 
 
 
