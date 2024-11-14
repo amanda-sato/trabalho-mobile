@@ -14,7 +14,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -50,11 +49,6 @@ class MainActivity : ComponentActivity() {
 fun ProgramaPrincipal() {
     val navController = rememberNavController()
 
-    val tipoPessoa = rememberSaveable { mutableStateOf("") }
-    val nome = rememberSaveable { mutableStateOf("") }
-    val telefone = rememberSaveable { mutableStateOf("") }
-    val valor1 = rememberSaveable { mutableStateOf("") }
-    val valor2 = rememberSaveable { mutableStateOf("") }
 
     // Usa uma lista mutável para ingredientes
     val ingredientesList = rememberSaveable { mutableStateOf(mutableListOf<String>()) }
@@ -74,11 +68,6 @@ fun ProgramaPrincipal() {
             Box(modifier = Modifier.padding(padding)) {
                 AppNavigation(
                     navController = navController,
-                    tipoPessoa = tipoPessoa,
-                    nome = nome,
-                    telefone = telefone,
-                    valor1 = valor1,
-                    valor2 = valor2,
                     onIngredientsSelected = onIngredientsSelected
                 )
             }
@@ -89,11 +78,6 @@ fun ProgramaPrincipal() {
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    tipoPessoa: MutableState<String>,
-    nome: MutableState<String>,
-    telefone: MutableState<String>,
-    valor1: MutableState<String>,
-    valor2: MutableState<String>,
     onIngredientsSelected: (List<String>, String) -> Unit
 ) {
     NavHost(navController, startDestination = Destino.Ecra03.route) {
