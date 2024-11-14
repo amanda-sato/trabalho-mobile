@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -31,21 +34,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 
 @Composable
 fun Ecra01(
-    tipoPessoa: MutableState<String>,
-    nome: MutableState<String>,
-    telefone: MutableState<String>,
-    valor1: MutableState<String>,
-    valor2: MutableState<String>,
     navController: NavHostController
 ) {
-    var selectedOption by remember { mutableStateOf(valor1.value) }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -54,68 +55,48 @@ fun Ecra01(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Escolha o tipo de pessoa:")
-
-        Row {
-            RadioButton(selected = selectedOption == valor1.value, onClick = { selectedOption = valor1.value })
-            Text(valor1.value)
-            Spacer(modifier = Modifier.width(16.dp))
-            RadioButton(selected = selectedOption == valor2.value, onClick = { selectedOption = valor2.value })
-            Text(valor2.value)
-        }
+        Text("Login", fontWeight = FontWeight.Bold, fontSize = 24.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BasicTextField(
-            value = nome.value,
-            onValueChange = { nome.value = it },
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
-        ) { innerTextField ->
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                if (nome.value.isEmpty()) {
-                    Text("Nome")
-                }
-                innerTextField()
-            }
-        }
-
-        BasicTextField(
-            value = telefone.value,
-            onValueChange = { telefone.value = it },
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
-        ) { innerTextField ->
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                if (telefone.value.isEmpty()) {
-                    Text("Telefone")
-                }
-                innerTextField()
-            }
-        }
+        // Campo de nome de usuário
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Usuário") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de senha
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Senha") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botão de login
         Button(onClick = {
-            tipoPessoa.value = selectedOption
-            navController.navigate(Destino.Ecra02.route)
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                navController.navigate(Destino.Ecra02.route) // Navegar para Ecra02
+            }
         }) {
-            Text("Adicionar")
+            Text("Entrar")
         }
     }
 }
 
 
+
 @Composable
 fun Ecra02(
     navController: NavHostController
-    ) {
+) {
     val categories = listOf("Café da Manhã", "Almoço", "Jantar")
     val recipesByCategory = mapOf(
         "Café da Manhã" to listOf("Panquecas" to "Panquecas fofinhas", "Omelete" to "Omelete saudável"),
@@ -124,18 +105,14 @@ fun Ecra02(
     )
 
     var selectedCategory by remember { mutableStateOf<String?>(null) }
-    var searchText by remember { mutableStateOf(TextFieldValue("")) }
+    var favoriteRecipes by remember { mutableStateOf(setOf<String>()) } // Set para armazenar receitas favoritas
 
     // Função para filtrar receitas pela pesquisa
     fun getFilteredRecipes(): List<Pair<String, String>> {
         return if (selectedCategory == null) {
-            recipesByCategory.values.flatten().filter {
-                it.first.contains(searchText.text, ignoreCase = true)
-            }
+            recipesByCategory.values.flatten()
         } else {
-            recipesByCategory[selectedCategory]?.filter {
-                it.first.contains(searchText.text, ignoreCase = true)
-            } ?: emptyList()
+            recipesByCategory[selectedCategory] ?: emptyList()
         }
     }
 
@@ -144,16 +121,6 @@ fun Ecra02(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Campo de pesquisa
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Pesquisar Receita") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Exibe categorias
         Text("Categorias", fontWeight = FontWeight.Bold)
         LazyRow(
@@ -177,42 +144,52 @@ fun Ecra02(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Exibe as receitas com base no filtro
+        // Exibe as receitas com base na categoria selecionada
         Text("Receitas", fontWeight = FontWeight.Bold)
 
         val filteredRecipes = getFilteredRecipes()
 
-        if (filteredRecipes.isEmpty()) {
-            Text("Nenhuma receita encontrada.")
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                items(filteredRecipes) { (recipeName, recipeDescription) ->
-                    Column(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                    ) {
+        LazyColumn {
+            items(filteredRecipes) { (recipeName, recipeDescription) ->
+                val isFavorite = favoriteRecipes.contains(recipeName)
+
+                // Exibe cada receita com a opção de favoritar
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            navController.navigate(Destino.Ecra05.createRoute(recipeName, recipeDescription))
+                        },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(recipeName, fontWeight = FontWeight.Bold)
                         Text(recipeDescription)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    IconButton(
+                        onClick = {
+                            // Adiciona ou remove a receita dos favoritos
+                            if (isFavorite) {
+                                favoriteRecipes = favoriteRecipes - recipeName
+                            } else {
+                                favoriteRecipes = favoriteRecipes + recipeName
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favoritar"
+                        )
                     }
                 }
             }
         }
-
-        // Botão de voltar ao início da tela 2
-        Button(onClick = {
-            selectedCategory = null // Redefine a categoria
-            searchText = TextFieldValue("") // Limpa o campo de pesquisa
-        }) {
-            Text("Voltar ao Início")
-        }
     }
 }
+
 
 
 
@@ -412,11 +389,10 @@ fun Ecra04(
 
 
 
-
 @Composable
 fun Ecra05(
     recipeName: String,
-    ingredients: String,
+    recipeDescription: String,
     navController: NavHostController
 ) {
     Column(
@@ -426,31 +402,24 @@ fun Ecra05(
     ) {
         Text(
             text = "Detalhes da Receita: $recipeName",
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Ingredientes da receita
-        Text("Ingredientes:", fontWeight = FontWeight.Bold)
-        ingredients.split(", ").forEach { ingredient ->
-            Text("- $ingredient")
-        }
+        // Descrição da receita
+        Text("Descrição: $recipeDescription", fontWeight = FontWeight.Normal)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Aqui você pode adicionar mais detalhes da receita, como modo de preparo.
-
-        Spacer(modifier = Modifier.height(24.dp))
-
         // Botão para voltar
         Button(onClick = {
-            navController.popBackStack() // Retorna à tela anterior
+            navController.popBackStack() // Voltar para a tela anterior
         }) {
             Text("Voltar")
         }
     }
 }
-
 
 
 

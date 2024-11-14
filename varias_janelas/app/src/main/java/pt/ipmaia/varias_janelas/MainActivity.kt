@@ -1,6 +1,5 @@
 package pt.ipmaia.varias_janelas
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,7 +36,6 @@ import pt.ipmaia.varias_janelas.ui.theme.Varias_janelasTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
         setContent {
             Varias_janelasTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = colorScheme.background) {
@@ -47,7 +45,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 @Composable
 fun ProgramaPrincipal() {
@@ -75,7 +72,15 @@ fun ProgramaPrincipal() {
         bottomBar = { BottomNavigationBar(navController = navController, appItems = Destino.toList) },
         content = { padding ->
             Box(modifier = Modifier.padding(padding)) {
-                AppNavigation(navController = navController, tipoPessoa, nome, telefone, valor1, valor2, onIngredientsSelected)
+                AppNavigation(
+                    navController = navController,
+                    tipoPessoa = tipoPessoa,
+                    nome = nome,
+                    telefone = telefone,
+                    valor1 = valor1,
+                    valor2 = valor2,
+                    onIngredientsSelected = onIngredientsSelected
+                )
             }
         }
     )
@@ -93,7 +98,7 @@ fun AppNavigation(
 ) {
     NavHost(navController, startDestination = Destino.Ecra03.route) {
         composable(Destino.Ecra01.route) {
-            Ecra01(tipoPessoa, nome, telefone, valor1, valor2, navController)
+            Ecra01(navController)
         }
         composable(Destino.Ecra02.route) {
             Ecra02(navController)
@@ -126,22 +131,22 @@ fun AppNavigation(
             val recipeDescription = backStackEntry.arguments?.getString("recipeDescription") ?: ""
             Ecra05(recipeName, recipeDescription, navController)
         }
-
     }
 }
 
-
-
-
 @Composable
 fun BottomNavigationBar(navController: NavController, appItems: List<Destino>) {
-    BottomNavigation(backgroundColor = colorResource(id = R.color.purple_700),contentColor = Color.White) {
+    BottomNavigation(backgroundColor = colorResource(id = R.color.purple_700), contentColor = Color.White) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         appItems.forEach { item ->
             BottomNavigationItem(
-                icon = { Icon(painterResource(id = item.icon), contentDescription = item.title, tint=if(currentRoute == item.route) Color.White else Color.White.copy(.4F)) },
-                label = { Text(text = item.title, color = if(currentRoute == item.route) Color.White else Color.White.copy(.4F)) },
+                icon = {
+                    Icon(painterResource(id = item.icon), contentDescription = item.title, tint = if (currentRoute == item.route) Color.White else Color.White.copy(.4F))
+                },
+                label = {
+                    Text(text = item.title, color = if (currentRoute == item.route) Color.White else Color.White.copy(.4F))
+                },
                 selectedContentColor = Color.White,
                 unselectedContentColor = Color.White.copy(0.4f),
                 alwaysShowLabel = true,
